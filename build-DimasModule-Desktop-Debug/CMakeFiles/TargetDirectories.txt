@@ -1,0 +1,7 @@
+C:/TEMPORARYDATA/datsPulse/DatsPulse/build-DimasModule-Desktop-Debug/CMakeFiles/DimasModule.dir
+C:/TEMPORARYDATA/datsPulse/DatsPulse/build-DimasModule-Desktop-Debug/CMakeFiles/edit_cache.dir
+C:/TEMPORARYDATA/datsPulse/DatsPulse/build-DimasModule-Desktop-Debug/CMakeFiles/rebuild_cache.dir
+C:/TEMPORARYDATA/datsPulse/DatsPulse/build-DimasModule-Desktop-Debug/CMakeFiles/list_install_components.dir
+C:/TEMPORARYDATA/datsPulse/DatsPulse/build-DimasModule-Desktop-Debug/CMakeFiles/install.dir
+C:/TEMPORARYDATA/datsPulse/DatsPulse/build-DimasModule-Desktop-Debug/CMakeFiles/install/local.dir
+C:/TEMPORARYDATA/datsPulse/DatsPulse/build-DimasModule-Desktop-Debug/CMakeFiles/install/strip.dir

@@ -1,0 +1,3 @@
+C:\MyData\Tools\Cmake\bin\cmake.exe -E rm -f CMakeFiles\DimasModule.dir/objects.a
+C:\MyData\Tools\mingw64\bin\ar.exe qc CMakeFiles\DimasModule.dir/objects.a @CMakeFiles\DimasModule.dir\objects1.rsp
+C:\MyData\Tools\mingw64\bin\g++.exe -DQT_QML_DEBUG -g -Wl,--whole-archive CMakeFiles\DimasModule.dir/objects.a -Wl,--no-whole-archive -o DimasModule.exe -Wl,--out-implib,libDimasModule.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\DimasModule.dir\linkLibs.rsp

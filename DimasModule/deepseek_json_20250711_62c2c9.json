@@ -1,0 +1,59 @@
+{
+  "ants": [
+    {
+      "id": 1,
+      "type": "0",
+      "q": 2,
+      "r": 3,
+      "health": 100,
+      "food": null,
+      "lastMove": [{"q": 2, "r": 2}, {"q": 2, "r": 3}],
+      "move": null,
+      "lastAttack": null,
+      "lastEnemyAnt": null
+    },
+    {
+      "id": 2,
+      "type": "0",
+      "q": -1,
+      "r": 4,
+      "health": 150,
+      "food": {"type": "1", "amount": 3},
+      "lastMove": [{"q": -1, "r": 3}, {"q": -1, "r": 4}],
+      "move": null,
+      "lastAttack": {"q": 0, "r": 4},
+      "lastEnemyAnt": 101
+    }
+  ],
+  "enemies": [
+    {
+      "type": "1",
+      "q": 0,
+      "r": 4,
+      "health": 120,
+      "food": null,
+      "attack": 20
+    }
+  ],
+  "food": [
+    {"q": 3, "r": -2, "type": "2", "amount": 5},
+    {"q": -2, "r": 1, "type": "2", "amount": 8}
+  ],
+  "home": [
+    {"q": 0, "r": 0},
+    {"q": 1, "r": 0},
+    {"q": 0, "r": 1}
+  ],
+  "map": [
+    {"q": 0, "r": 0, "type": "0", "cost": 0},
+    {"q": 1, "r": 0, "type": "0", "cost": 1},
+    {"q": 2, "r": 0, "type": "1", "cost": 2},
+    {"q": 0, "r": 1, "type": "1", "cost": 0},
+    {"q": 1, "r": 1, "type": "2", "cost": 3},
+    {"q": 2, "r": 1, "type": "2", "cost": 1}
+  ],
+  "nextTurnIn": 3.5,
+  "score": 42,
+  "spot": {"q": 0, "r": 0},
+  "turnNo": 17
+}
