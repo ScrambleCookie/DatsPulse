@@ -1,24 +1,25 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const { generateMapHTML } = require('./gui/map-html');
-const { generateHomeHTML } = require('./gui/home-html');
+const path = require('path');
 const app = express();
 const port = 8080;
 
 app.use(cors({origin: '*'}));
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(express.static('public')); // Добавляем статические файлы
 
 // Кэш для данных арены
 let arenaData = null;
 let lastUpdateTime = 0;
 let isRegistered = false;
-let currentToken = null;
+let currentToken = process.env.TOKEN; // Берем токен из .env файла
 
 // Конфигурация для API
 const API_CONFIG = {
-    baseURL: 'https://games-test.datsteam.dev', // или 'https://games.datsteam.dev' для финальных раундов
+    baseURL: process.env.API_BASE_URL || 'https://games-test.datsteam.dev', // или 'https://games.datsteam.dev' для финальных раундов
     headers: {
         'Content-Type': 'application/json'
     }
@@ -49,21 +50,28 @@ async function fetchArenaData() {
 }
 
 // Функция для регистрации на раунд
-async function registerForRound(token) {
+async function registerForRound() {
     try {
-        const response = await axios.post(`${API_CONFIG.baseURL}/api/register?token=${token}`, {}, {
+        if (!currentToken) {
+            throw new Error('Токен не найден в .env файле');
+        }
+
+        const response = await axios.post(`${API_CONFIG.baseURL}/api/register?token=${currentToken}`, {}, {
             headers: {
                 ...API_CONFIG.headers,
-                'X-Auth-Token': token
+                'X-Auth-Token': currentToken
             }
         });
         
-        currentToken = token;
         isRegistered = true;
         console.log('Successfully registered for round');
         return { success: true, data: response.data };
     } catch (error) {
         console.error('Registration failed:', error.message);
+        if (error.response) {
+            console.error('Response status:', error.response.status);
+            console.error('Response data:', error.response.data);
+        }
         return { success: false, error: error.message };
     }
 }
@@ -74,16 +82,45 @@ setInterval(fetchArenaData, 1000);
 // Инициализация первого запроса
 fetchArenaData();
 
+/* API эндпоинты */
+
+/* Эндпоинт для получения статуса сервера */
+app.get('/api/status', async (req, res) => {
+    try {
+        res.json({
+            isRegistered: isRegistered,
+            hasToken: !!currentToken,
+            tokenPreview: currentToken ? currentToken.substring(0, 8) + '...' : null
+        });
+    } catch (error) {
+        console.error('Status error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/* Эндпоинт для получения данных арены */
+app.get('/api/arena', async (req, res) => {
+    try {
+        if (!isRegistered) {
+            return res.status(401).json({ error: 'Not registered' });
+        }
+        
+        // Обновляем данные если они старые
+        if (!arenaData || Date.now() - lastUpdateTime > 2000) {
+            await fetchArenaData();
+        }
+        
+        res.json(arenaData);
+    } catch (error) {
+        console.error('Error getting arena data:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 /* Эндпоинт для регистрации на раунд */
 app.post('/api/register', async (req, res) => {
     try {
-        const { token } = req.body;
-        
-        if (!token) {
-            return res.status(400).json({ error: 'Token is required' });
-        }
-
-        const result = await registerForRound(token);
+        const result = await registerForRound();
         
         if (result.success) {
             res.json({ 
@@ -103,31 +140,14 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-/* Эндпоинт для получения HTML карты */
-app.get('/map', async (req, res) => {
-    try {
-        if (!isRegistered) {
-            return res.redirect('/');
-        }
-
-        // Обновляем данные если они старые
-        if (!arenaData || Date.now() - lastUpdateTime > 2000) {
-            await fetchArenaData();
-        }
-        
-        const mapHTML = generateMapHTML(arenaData);
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.send(mapHTML);
-    } catch (error) {
-        console.error('Error generating map:', error);
-        res.status(500).send('Error generating map');
-    }
+/* Главная страница - Vue.js приложение */
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-/* Обработка стартовой страницы сайта */
-app.get('/', (req, res) => {
-    const homeHTML = generateHomeHTML(isRegistered, port);
-    res.send(homeHTML);
+/* Страница карты - редирект на главную (Vue.js обработает маршрутизацию) */
+app.get('/map', (req, res) => {
+    res.redirect('/');
 });
 
 /* Пустой запрос */
