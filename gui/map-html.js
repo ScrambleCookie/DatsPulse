@@ -4,7 +4,74 @@ const { generateHexagon } = require('./map-generator');
 // Функция для генерации HTML карты
 function generateMapHTML(arenaData) {
     if (!arenaData) {
-        return '<div>Нет данных арены</div>';
+        return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>DatsPulse Arena Map</title>
+            <meta charset="UTF-8">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 20px;
+                    background-color: #f0f0f0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                }
+                .error-container {
+                    background-color: white;
+                    padding: 40px;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    text-align: center;
+                    max-width: 500px;
+                }
+                .error-message {
+                    color: #d32f2f;
+                    font-size: 18px;
+                    margin-bottom: 20px;
+                }
+                .back-button {
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 5px;
+                    text-decoration: none;
+                    display: inline-block;
+                    margin-top: 20px;
+                }
+                .back-button:hover {
+                    background-color: #45a049;
+                }
+            </style>
+            <script>
+                // Попытка обновить через 3 секунды
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+            </script>
+        </head>
+        <body>
+            <div class="error-container">
+                <h1>⚠️ Нет данных арены</h1>
+                <div class="error-message">
+                    Данные арены не доступны. Возможные причины:
+                    <ul style="text-align: left; margin-top: 10px;">
+                        <li>Не удалось подключиться к серверу игры</li>
+                        <li>Неверный токен авторизации</li>
+                        <li>Раунд еще не начался</li>
+                    </ul>
+                </div>
+                <p>Страница автоматически обновится через 3 секунды...</p>
+                <a href="/" class="back-button">← Вернуться на главную</a>
+            </div>
+        </body>
+        </html>
+        `;
     }
 
     const hexSize = 20;
