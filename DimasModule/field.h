@@ -62,7 +62,7 @@ public:
     }
 
 private:
-    long int height, width;
+    long int height, width, yOffset, xOffset;//Вычесть отступ  файл->мы, прибавить отступ мы->файл
     std::vector<std::vector<Hex>> field;
     //std::vector<Unit> ourAnts, enemyAnts;
 };
