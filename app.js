@@ -159,6 +159,7 @@ async function makeMove() {
         }
 
         const response = await axios.post(`${API_CONFIG.baseURL}/api/move`, {
+            // TODO - СЮДА ХОДЫ ОТ ПРОГИ ДИМЫ И БОРИ
             moves: []
         }, {
             headers: {

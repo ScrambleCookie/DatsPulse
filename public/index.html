@@ -18,9 +18,27 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .left-panel {
+            flex: 1;
+        }
+        
+        .right-panel {
+            width: 300px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            height: fit-content;
         }
         
         .header {
@@ -96,6 +114,33 @@
             position: relative;
             overflow: hidden;
             height: 600px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .map-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .map-control-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+            min-width: auto;
+        }
+        
+        .zoom-indicator {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
         }
         
         .map-viewport {
@@ -109,11 +154,69 @@
         
         .map-svg {
             cursor: grab;
-            transition: transform 0.3s ease;
+            width: 100%;
+            height: 100%;
+            display: block;
+            transition: transform 0.1s ease-out;
+            user-select: none;
         }
         
         .map-svg:active {
             cursor: grabbing;
+        }
+        
+        .map-svg.dragging {
+            cursor: grabbing;
+            transition: none;
+        }
+        
+        .legend {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .legend h3 {
+            grid-column: 1 / -1;
+            margin: 0 0 15px 0;
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 5px;
+        }
+        
+        .stats-section {
+            margin-bottom: 25px;
+        }
+        
+        .stats-section h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            font-size: 14px;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #2196F3;
         }
         
         .error-message {
@@ -133,21 +236,39 @@
         }
         
         .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
-            justify-content: center;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
         }
         
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 5px;
-            padding: 5px 10px;
-            background-color: #f8f8f8;
-            border-radius: 5px;
-            font-size: 12px;
+            gap: 10px;
+            padding: 5px 0;
+            font-size: 14px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #333;
+            flex-shrink: 0;
+        }
+        
+        .legend-category {
+            margin-bottom: 15px;
+        }
+        
+        .legend-category h5 {
+            margin: 0 0 8px 0;
+            color: #555;
+            font-size: 14px;
+            font-weight: bold;
         }
         
         .legend-color {
@@ -179,128 +300,288 @@
         <div class="container">
             <div class="header">
                 <h1>🐜 DatsPulse Arena</h1>
-                <p>Визуализация арены в реальном времени</p>
+                <p>Игра в муравейник - управляйте колонией муравьев</p>
             </div>
             
-            <div class="status-panel">
-                <div class="status-item">
-                    <strong>Статус сервера:</strong>
-                    <span :class="serverStatus.isOnline ? 'text-success' : 'text-danger'">
-                        {{ serverStatus.isOnline ? '✅ Онлайн' : '❌ Офлайн' }}
-                    </span>
-                </div>
-                <div class="status-item">
-                    <strong>Регистрация:</strong>
-                    <span :class="gameStatus.isRegistered ? 'text-success' : 'text-warning'">
-                        {{ gameStatus.isRegistered ? '✅ Зарегистрирован' : '❌ Не зарегистрирован' }}
-                    </span>
-                </div>
-                <div class="status-item" v-if="gameStatus.isRegistered && arenaData">
-                    <strong>Ход:</strong>
-                    <span>{{ arenaData.turnNo }}</span>
-                </div>
-                <div class="status-item" v-if="gameStatus.isRegistered && arenaData">
-                    <strong>Счет:</strong>
-                    <span>{{ arenaData.score }}</span>
-                </div>
-                <div class="status-item" v-if="gameStatus.isRegistered && arenaData">
-                    <strong>До следующего хода:</strong>
-                    <span>{{ arenaData.nextTurnIn ? arenaData.nextTurnIn.toFixed(1) : 0 }}с</span>
-                </div>
-            </div>
-            
-            <div class="controls">
-                <button 
-                    class="btn btn-primary" 
-                    @click="register" 
-                    :disabled="loading || gameStatus.isRegistered"
-                >
-                    {{ loading ? 'Регистрация...' : '🎮 Зарегистрироваться' }}
-                </button>
-                <button 
-                    class="btn btn-secondary" 
-                    @click="centerOnBase" 
-                    :disabled="!gameStatus.isRegistered || !arenaData"
-                >
-                    🏠 К базе
-                </button>
-                <button 
-                    class="btn btn-secondary" 
-                    @click="toggleAutoUpdate"
-                >
-                    {{ autoUpdate ? '⏸️ Приостановить' : '▶️ Возобновить' }}
-                </button>
-            </div>
-            
-            <div v-if="errorMessage" class="error-message">
-                {{ errorMessage }}
-            </div>
-            
-            <div v-if="successMessage" class="success-message">
-                {{ successMessage }}
-            </div>
-            
-            <div class="map-container" v-if="gameStatus.isRegistered">
-                <div class="auto-update-indicator" v-if="autoUpdate">
-                    🔄 Автообновление
+            <div class="main-content">
+                <div class="left-panel">
+                    <div class="status-panel">
+                        <h3>📊 Статус игры</h3>
+                        <div class="status-item">
+                            <strong>Сервер:</strong>
+                            <span :class="{ 'text-success': serverStatus.isOnline, 'text-danger': !serverStatus.isOnline }">
+                                {{ serverStatus.isOnline ? '🟢 Онлайн' : '🔴 Офлайн' }}
+                            </span>
+                        </div>
+                        <div class="status-item">
+                            <strong>Регистрация:</strong>
+                            <span :class="{ 'text-success': gameStatus.isRegistered, 'text-danger': !gameStatus.isRegistered }">
+                                {{ gameStatus.isRegistered ? '✅ Зарегистрирован' : '❌ Не зарегистрирован' }}
+                            </span>
+                        </div>
+                        <div class="status-item" v-if="gameStatus.isRegistered && arenaData">
+                            <strong>Ход:</strong>
+                            <span>{{ arenaData.turnNo }}</span>
+                        </div>
+                        <div class="status-item" v-if="gameStatus.isRegistered && arenaData">
+                            <strong>Счет:</strong>
+                            <span>{{ arenaData.score }}</span>
+                        </div>
+                        <div class="status-item" v-if="gameStatus.isRegistered && arenaData">
+                            <strong>До следующего хода:</strong>
+                            <span>{{ arenaData.nextTurnIn ? arenaData.nextTurnIn.toFixed(1) : 0 }}с</span>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button 
+                            class="btn btn-primary" 
+                            @click="register" 
+                            :disabled="loading || gameStatus.isRegistered"
+                        >
+                            {{ loading ? 'Регистрация...' : '🎮 Зарегистрироваться' }}
+                        </button>
+                        <button 
+                            class="btn btn-secondary" 
+                            @click="centerOnBase" 
+                            :disabled="!gameStatus.isRegistered || !arenaData"
+                        >
+                            🏠 К базе
+                        </button>
+                        <button 
+                            class="btn btn-secondary" 
+                            @click="toggleAutoUpdate"
+                        >
+                            {{ autoUpdate ? '⏸️ Приостановить' : '▶️ Возобновить' }}
+                        </button>
+                    </div>
+                    
+                    <div v-if="errorMessage" class="error-message">
+                        {{ errorMessage }}
+                    </div>
+                    
+                    <div v-if="successMessage" class="success-message">
+                        {{ successMessage }}
+                    </div>
+                    
+                    <div class="map-container" v-if="gameStatus.isRegistered">
+                        <div class="map-controls">
+                            <div class="auto-update-indicator" v-if="autoUpdate">
+                                🔄 Автообновление
+                            </div>
+                            <div class="map-control-buttons">
+                                <button @click="resetMapPosition" class="btn btn-small">📍 Центр</button>
+                                <button @click="resetMapZoom" class="btn btn-small">🔍 Сброс</button>
+                                <span class="zoom-indicator">{{ Math.round(mapZoom * 100) }}%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="map-viewport" ref="mapViewport">
+                            <div 
+                                v-html="mapSvg" 
+                                class="map-svg"
+                                :class="{ loading: loading, dragging: isDragging }"
+                                @mousedown="startDrag"
+                                @wheel="handleWheel"
+                                :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
+                            ></div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="map-viewport" ref="mapViewport">
-                    <div 
-                        v-html="mapSvg" 
-                        class="map-svg"
-                        :class="{ loading: loading }"
-                        @mousedown="startDrag"
-                        @mousemove="drag"
-                        @mouseup="stopDrag"
-                        @mouseleave="stopDrag"
-                    ></div>
+                <div class="right-panel" v-if="gameStatus.isRegistered">
+                    <h3>📈 Статистика</h3>
+                    
+                    <div class="stats-section">
+                        <h4>🐜 Наши муравьи</h4>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span>Всего:</span>
+                                <span class="stat-value">{{ antStats.total }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Рабочие:</span>
+                                <span class="stat-value">{{ antStats.workers }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Бойцы:</span>
+                                <span class="stat-value">{{ antStats.warriors }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Разведчики:</span>
+                                <span class="stat-value">{{ antStats.scouts }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Общее HP:</span>
+                                <span class="stat-value">{{ antStats.totalHealth }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Среднее HP:</span>
+                                <span class="stat-value">{{ antStats.averageHealth }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-section">
+                        <h4>🍎 Ресурсы</h4>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span>Всего:</span>
+                                <span class="stat-value">{{ resourceStats.total }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Яблоки:</span>
+                                <span class="stat-value">{{ resourceStats.apples }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Хлеб:</span>
+                                <span class="stat-value">{{ resourceStats.bread }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Нектар:</span>
+                                <span class="stat-value">{{ resourceStats.nectar }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Общее кол-во:</span>
+                                <span class="stat-value">{{ resourceStats.totalAmount }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-section">
+                        <h4>👹 Враги</h4>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span>Всего:</span>
+                                <span class="stat-value">{{ enemyStats.total }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Рабочие:</span>
+                                <span class="stat-value">{{ enemyStats.workers }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Бойцы:</span>
+                                <span class="stat-value">{{ enemyStats.warriors }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Разведчики:</span>
+                                <span class="stat-value">{{ enemyStats.scouts }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Общее HP:</span>
+                                <span class="stat-value">{{ enemyStats.totalHealth }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-section">
+                        <h4>🗺️ Карта</h4>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span>Всего гексов:</span>
+                                <span class="stat-value">{{ mapStats.totalHexes }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Пустые:</span>
+                                <span class="stat-value">{{ mapStats.empty }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Грязь:</span>
+                                <span class="stat-value">{{ mapStats.dirt }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Кислота:</span>
+                                <span class="stat-value">{{ mapStats.acid }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Камни:</span>
+                                <span class="stat-value">{{ mapStats.stones }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Кэшированые:</span>
+                                <span class="stat-value">{{ mapStats.cached }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="legend" v-if="gameStatus.isRegistered">
+                <h3>🎨 Легенда карты</h3>
                 
-                <div class="legend">
+                <div class="legend-category">
+                    <h5>Типы гексов</h5>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #90EE90;"></div>
+                        <div class="legend-color" :style="{ backgroundColor: getHexColor(1) }"></div>
+                        <span>Муравейник</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" :style="{ backgroundColor: getHexColor(2) }"></div>
                         <span>Пустой гекс</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #8B4513;"></div>
-                        <span>Грязь/Муравейник</span>
+                        <div class="legend-color" :style="{ backgroundColor: getHexColor(3) }"></div>
+                        <span>Грязь</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #FFFF00;"></div>
+                        <div class="legend-color" :style="{ backgroundColor: getHexColor(4) }"></div>
                         <span>Кислота</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #808080;"></div>
+                        <div class="legend-color" :style="{ backgroundColor: getHexColor(5) }"></div>
                         <span>Камни</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #555555;"></div>
+                        <div class="legend-color" :style="{ backgroundColor: '#555555' }"></div>
                         <span>Невидимые гексы (кэш)</span>
                     </div>
+                </div>
+                
+                <div class="legend-category">
+                    <h5>Ресурсы</h5>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #FF0000; border-radius: 50%;"></div>
-                        <span>Яблоко</span>
+                        <div class="legend-color" :style="{ backgroundColor: getResourceColor(1), borderRadius: '50%' }"></div>
+                        <span>Яблоко ({{ resourceStats.apples }})</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #DEB887; border-radius: 50%;"></div>
-                        <span>Хлеб</span>
+                        <div class="legend-color" :style="{ backgroundColor: getResourceColor(2), borderRadius: '50%' }"></div>
+                        <span>Хлеб ({{ resourceStats.bread }})</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #FFD700; border-radius: 50%;"></div>
-                        <span>Нектар</span>
+                        <div class="legend-color" :style="{ backgroundColor: getResourceColor(3), borderRadius: '50%' }"></div>
+                        <span>Нектар ({{ resourceStats.nectar }})</span>
+                    </div>
+                </div>
+                
+                <div class="legend-category">
+                    <h5>Наши муравьи</h5>
+                    <div class="legend-item">
+                        <div class="legend-color" :style="{ backgroundColor: getAntColor(0), borderRadius: '50%' }"></div>
+                        <span>Рабочий ({{ antStats.workers }})</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #8B4513; border-radius: 50%;"></div>
-                        <span>Рабочий ({{ arenaData ? arenaData.ants?.filter(a => a.type === 0).length || 0 : 0 }})</span>
+                        <div class="legend-color" :style="{ backgroundColor: getAntColor(1), borderRadius: '50%' }"></div>
+                        <span>Боец ({{ antStats.warriors }})</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #FF0000; border-radius: 50%;"></div>
-                        <span>Боец ({{ arenaData ? arenaData.ants?.filter(a => a.type === 1).length || 0 : 0 }})</span>
+                        <div class="legend-color" :style="{ backgroundColor: getAntColor(2), borderRadius: '50%' }"></div>
+                        <span>Разведчик ({{ antStats.scouts }})</span>
+                    </div>
+                </div>
+                
+                <div class="legend-category">
+                    <h5>Вражеские муравьи</h5>
+                    <div class="legend-item">
+                        <div class="legend-color" :style="{ backgroundColor: getAntColor(0), borderRadius: '50%', border: '2px solid #FF0000' }"></div>
+                        <span>Рабочий врага ({{ enemyStats.workers }})</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #0000FF; border-radius: 50%;"></div>
-                        <span>Разведчик ({{ arenaData ? arenaData.ants?.filter(a => a.type === 2).length || 0 : 0 }})</span>
+                        <div class="legend-color" :style="{ backgroundColor: getAntColor(1), borderRadius: '50%', border: '2px solid #FF0000' }"></div>
+                        <span>Боец врага ({{ enemyStats.warriors }})</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" :style="{ backgroundColor: getAntColor(2), borderRadius: '50%', border: '2px solid #FF0000' }"></div>
+                        <span>Разведчик врага ({{ enemyStats.scouts }})</span>
                     </div>
                 </div>
             </div>
