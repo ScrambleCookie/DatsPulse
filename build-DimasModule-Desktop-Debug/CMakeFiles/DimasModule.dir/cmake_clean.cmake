@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/DimasModule.dir/Unit.cpp.obj"
-  "CMakeFiles/DimasModule.dir/Unit.cpp.obj.d"
+  "CMakeFiles/DimasModule.dir/C_/TEMPORARYDATA/datsPulse/DatsPulse/Unit.cpp.obj"
+  "CMakeFiles/DimasModule.dir/C_/TEMPORARYDATA/datsPulse/DatsPulse/Unit.cpp.obj.d"
   "CMakeFiles/DimasModule.dir/field.cpp.obj"
   "CMakeFiles/DimasModule.dir/field.cpp.obj.d"
   "CMakeFiles/DimasModule.dir/main.cpp.obj"

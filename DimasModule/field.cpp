@@ -1,6 +1,6 @@
 #include "field.h"
 
-Field::Field(std::string fileName)//Убрать из конструктора максимальные размеры
+Field::Field(std::string fileName)
 {
     std::fstream inputStr(fileName);
     data = json::parse(inputStr);
@@ -46,14 +46,41 @@ Field::Field(std::string fileName)//Убрать из конструктора �
         field[(long int)(data["food"][i]["q"])-xOffset][(long int)(data["food"][i]["r"])-yOffset].foodType = static_cast<FOOD_TYPE>(data["food"][i]["type"]);
         field[(long int)(data["food"][i]["q"])-xOffset][(long int)(data["food"][i]["r"])-yOffset].foodAmount = data["food"][i]["amount"];
     }
-    for(int i = 0; i < data["ants"].size(); i++)
+}
+
+std::vector<std::pair<long int, long int>> Field::getNearHexes(long int x, long int y)
+{
+    std::pair<long int, long int> buff;
+    std::vector<std::pair<long int, long int>> ans;
+    buff.first = x + 1;
+    buff.second = y;
+    ans.push_back(buff);
+    buff.first = x - 1;
+    buff.second = y;
+    ans.push_back(buff);
+    buff.first = x;
+    buff.second = y + 1;
+    ans.push_back(buff);
+    buff.first = x;
+    buff.second = y - 1;
+    ans.push_back(buff);
+    if(y % 2 == 0)
     {
-        //ourAnts.push_back(Unit(data["ants"][i]["id"], (long int)(data["ants"][i]["q"])-xOffset, (long int)(data["ants"][i]["r"])-yOffset, data["ants"][i]["type"],
-        //                       data["ants"][i]["health"], data["ants"][i]["food"]["amount"], static_cast<FOOD_TYPE>(data["ants"][i]["food"]["type"])));
+        buff.first = x - 1;
+        buff.second = y - 1;
+        ans.push_back(buff);
+        buff.first = x - 1;
+        buff.second = y + 1;
+        ans.push_back(buff);
     }
-    for(int i = 0; i < data["enemies"].size(); i++)
+    else
     {
-        //enemyAnts.push_back(Unit(0, (long int)(data["ants"][i]["q"])-xOffset, (long int)(data["ants"][i]["r"])-yOffset, data["ants"][i]["type"],
-        //                      data["ants"][i]["health"], data["ants"][i]["food"]["amount"], (static_cast<FOOD_TYPE> data["ants"][i]["food"]["type"])));
+        buff.first = x + 1;
+        buff.second = y - 1;
+        ans.push_back(buff);
+        buff.first = x + 1;
+        buff.second = y + 1;
+        ans.push_back(buff);
     }
+    return ans;
 }
