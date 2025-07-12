@@ -3,6 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
+const fs = require('fs');
+const { spawn } = require('child_process');
+const { generateMovesWithExe } = require('./moves/exeProcessor');
 const app = express();
 const port = 8080;
 
@@ -154,120 +157,6 @@ function getFullMapWithCache() {
 // Локальное отслеживание позиций муравьев
 let localAntPositions = new Map();
 
-// Функция для генерации тестовых ходов
-function generateTestMoves() {
-    console.log('=== Generating test moves ===');
-    console.log('Arena data exists:', !!arenaData);
-    console.log('Ants array exists:', !!arenaData?.ants);
-    console.log('Ants count:', arenaData?.ants?.length || 0);
-    
-    if (!arenaData || !arenaData.ants || arenaData.ants.length === 0) {
-        console.log('No ants available for moves');
-        return [];
-    }
-    
-    // Покажем структуру первого муравья
-    console.log('First ant structure:', JSON.stringify(arenaData.ants[0], null, 2));
-    
-    // Инициализируем локальные позиции муравьев, если они не были инициализированы
-    for (const ant of arenaData.ants) {
-        // Проверим все возможные варианты структуры ant
-        console.log('Ant keys:', Object.keys(ant));
-        
-        let antId, antPosition;
-        
-        // Попробуем разные варианты идентификатора
-        if (ant.uuid) {
-            antId = ant.uuid;
-        } else if (ant.id) {
-            antId = ant.id;
-        } else {
-            console.log('Cannot find ant identifier');
-            continue;
-        }
-        
-        // Попробуем разные варианты позиции
-        if (ant.position && ant.position.q !== undefined && ant.position.r !== undefined) {
-            antPosition = { q: ant.position.q, r: ant.position.r };
-        } else if (ant.q !== undefined && ant.r !== undefined) {
-            antPosition = { q: ant.q, r: ant.r };
-        } else {
-            console.log('Cannot find ant position for ant:', antId);
-            continue;
-        }
-        
-        if (!localAntPositions.has(antId)) {
-            localAntPositions.set(antId, antPosition);
-            console.log(`Initialized position for ant ${antId}: (${antPosition.q}, ${antPosition.r})`);
-        }
-    }
-
-    const moves = [];
-    
-    // Направления в hex-сетке
-    const directions = [
-        { q: 0, r: -1 },  // Север
-        { q: 1, r: -1 },  // Северо-восток
-        { q: 1, r: 0 },   // Юго-восток
-        { q: 0, r: 1 },   // Юг
-        { q: -1, r: 1 },  // Юго-запад
-        { q: -1, r: 0 }   // Северо-запад
-    ];
-    
-    // Берем каждого муравья и отправляем в случайном направлении
-    arenaData.ants.forEach(ant => {
-        let antId;
-        
-        // Попробуем разные варианты идентификатора
-        if (ant.uuid) {
-            antId = ant.uuid;
-        } else if (ant.id) {
-            antId = ant.id;
-        } else {
-            console.log('Cannot find ant identifier in move generation');
-            return;
-        }
-        
-        // Используем локальную позицию вместо позиции из API
-        const currentPos = localAntPositions.get(antId);
-        
-        if (!currentPos) {
-            console.log(`Warning: No position found for ant ${antId}, skipping`);
-            return;
-        }
-        
-        // Случайное направление
-        const randomDirection = directions[Math.floor(Math.random() * directions.length)];
-        
-        // Новая позиция
-        const newQ = currentPos.q + randomDirection.q;
-        const newR = currentPos.r + randomDirection.r;
-        
-        // Создаем ход для этого муравья - используем правильную структуру API
-        const move = {
-            ant: antId,
-            path: [
-                {
-                    q: newQ,
-                    r: newR
-                }
-            ]
-        };
-        
-        // Обновляем локальную позицию
-        localAntPositions.set(antId, {
-            q: newQ,
-            r: newR
-        });
-        
-        moves.push(move);
-        console.log(`Ant ${antId} (type ${ant.type}) moving from (${currentPos.q}, ${currentPos.r}) to (${newQ}, ${newR})`);
-    });
-    
-    console.log(`Generated ${moves.length} random moves for all ants`);
-    return moves;
-}
-
 // Функция для выполнения хода
 async function makeMove() {
     try {
@@ -275,11 +164,12 @@ async function makeMove() {
             return null;
         }
 
-        // Генерируем тестовые ходы
-        const testMoves = generateTestMoves();
+        // Генерируем ходы с помощью exe файла
+        const movesData = await generateMovesWithExe(arenaData);
+        const moves = movesData.moves || [];
 
         const response = await axios.post(`${API_CONFIG.baseURL}/api/move?token=${currentToken}`, {
-            moves: testMoves
+            moves: moves
         }, {
             headers: {
                 ...API_CONFIG.headers,
@@ -309,8 +199,6 @@ setInterval(makeMove, 1000);
 
 // Инициализация первого запроса
 fetchArenaData();
-
-/* API эндпоинты */
 
 /* Эндпоинт для получения статуса сервера */
 app.get('/api/status', async (req, res) => {
