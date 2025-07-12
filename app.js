@@ -17,9 +17,13 @@ let lastUpdateTime = 0;
 let isRegistered = false;
 let currentToken = process.env.TOKEN; // Берем токен из .env файла
 
+// Сохранение карты в рамках раунда
+let roundMapCache = new Map(); // Кэш для сохранения всех гексов раунда
+let currentRoundId = null;
+
 // Конфигурация для API
 const API_CONFIG = {
-    baseURL: process.env.API_BASE_URL || 'https://games-test.datsteam.dev', // или 'https://games.datsteam.dev' для финальных раундов
+    baseURL: process.env.API_BASE_URL || 'https://games-test.datsteam.dev', // используем основной URL
     headers: {
         'Content-Type': 'application/json'
     }
@@ -41,6 +45,10 @@ async function fetchArenaData() {
         });
         arenaData = response.data;
         lastUpdateTime = Date.now();
+        
+        // Обновляем кэш карты
+        updateMapCache(arenaData);
+        
         console.log(`Arena data updated. Turn: ${arenaData.turnNo}, Next turn in: ${arenaData.nextTurnIn}s`);
         return arenaData;
     } catch (error) {
@@ -65,6 +73,10 @@ async function registerForRound() {
         
         isRegistered = true;
         console.log('Successfully registered for round');
+        
+        // После регистрации получаем карту
+        await fetchArenaData();
+        
         return { success: true, data: response.data };
     } catch (error) {
         console.error('Registration failed:', error.message);
@@ -76,8 +88,101 @@ async function registerForRound() {
     }
 }
 
-// Запуск периодического обновления данных
-setInterval(fetchArenaData, 1000);
+// Функция для обновления кэша карты
+function updateMapCache(arenaData) {
+    if (!arenaData) return;
+    
+    // Если это новый раунд, очищаем кэш
+    if (currentRoundId !== arenaData.turnNo) {
+        if (arenaData.turnNo === 1) {
+            roundMapCache.clear();
+            currentRoundId = arenaData.turnNo;
+            console.log('New round started, clearing map cache');
+        } else {
+            currentRoundId = arenaData.turnNo;
+        }
+    }
+    
+    // Обновляем кэш с текущими видимыми гексами
+    if (arenaData.map) {
+        arenaData.map.forEach(hex => {
+            const key = `${hex.q},${hex.r}`;
+            roundMapCache.set(key, {
+                ...hex,
+                lastSeen: Date.now(),
+                isVisible: true
+            });
+        });
+    }
+}
+
+// Функция для получения полной карты с учетом кэша
+function getFullMapWithCache() {
+    if (!arenaData) return null;
+    
+    const currentTime = Date.now();
+    const visibleHexes = new Set();
+    
+    // Отмечаем видимые гексы
+    if (arenaData.map) {
+        arenaData.map.forEach(hex => {
+            visibleHexes.add(`${hex.q},${hex.r}`);
+        });
+    }
+    
+    // Создаем полную карту
+    const fullMap = [];
+    
+    // Добавляем все кэшированные гексы
+    for (const [key, hex] of roundMapCache.entries()) {
+        const isCurrentlyVisible = visibleHexes.has(key);
+        fullMap.push({
+            ...hex,
+            isVisible: isCurrentlyVisible,
+            isFromCache: !isCurrentlyVisible
+        });
+    }
+    
+    return {
+        ...arenaData,
+        map: fullMap,
+        originalMap: arenaData.map // Сохраняем оригинальную карту
+    };
+}
+
+// Функция для выполнения хода
+async function makeMove() {
+    try {
+        if (!isRegistered || !currentToken) {
+            console.log('Not registered or no token available');
+            return null;
+        }
+
+        const response = await axios.post(`${API_CONFIG.baseURL}/api/move`, {
+            moves: []
+        }, {
+            headers: {
+                ...API_CONFIG.headers,
+                'X-Auth-Token': currentToken
+            }
+        });
+        
+        arenaData = response.data;
+        lastUpdateTime = Date.now();
+        
+        // Обновляем кэш карты
+        updateMapCache(arenaData);
+        
+        console.log(`Move executed. Turn: ${arenaData.turnNo}, Next turn in: ${arenaData.nextTurnIn}s`);
+        return arenaData;
+    } catch (error) {
+        console.error('Error making move:', error.message);
+        return null;
+    }
+}
+
+// Запуск периодического обновления данных (используем makeMove вместо fetchArenaData)
+setInterval(makeMove, 1000);
 
 // Инициализация первого запроса
 fetchArenaData();
@@ -110,7 +215,9 @@ app.get('/api/arena', async (req, res) => {
             await fetchArenaData();
         }
         
-        res.json(arenaData);
+        // Возвращаем данные с учетом кэша
+        const fullArenaData = getFullMapWithCache();
+        res.json(fullArenaData || arenaData);
     } catch (error) {
         console.error('Error getting arena data:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -136,6 +243,28 @@ app.post('/api/register', async (req, res) => {
         }
     } catch (error) {
         console.error('Registration error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/* Эндпоинт для выполнения хода */
+app.post('/api/move', async (req, res) => {
+    try {
+        if (!isRegistered) {
+            return res.status(401).json({ error: 'Not registered' });
+        }
+        
+        const result = await makeMove();
+        
+        if (result) {
+            // Возвращаем данные с учетом кэша
+            const fullArenaData = getFullMapWithCache();
+            res.json(fullArenaData || result);
+        } else {
+            res.status(500).json({ error: 'Failed to make move' });
+        }
+    } catch (error) {
+        console.error('Move error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

@@ -175,8 +175,16 @@ createApp({
             mapData.forEach(hex => {
                 const isHome = home.some(h => h.q === hex.q && h.r === hex.r);
                 const isSpot = spot.q === hex.q && spot.r === hex.r;
+                const isFromCache = hex.isFromCache || false;
+                const isVisible = hex.isVisible !== false;
                 
                 let color = this.getHexColor(hex.type);
+                
+                // Если гекс из кэша (не видим в данный момент), делаем его серым
+                if (isFromCache || !isVisible) {
+                    color = this.darkenColor(color, 0.5); // Затемняем цвет
+                }
+                
                 let strokeColor = '#000';
                 let strokeWidth = 1;
                 
@@ -186,6 +194,9 @@ createApp({
                 } else if (isHome) {
                     strokeColor = '#00FF00';
                     strokeWidth = 2;
+                } else if (isFromCache || !isVisible) {
+                    strokeColor = '#666';
+                    strokeWidth = 1;
                 }
                 
                 svgContent += this.generateHexagon(hex.q, hex.r, hexSize, color, strokeColor, strokeWidth);
@@ -307,6 +318,18 @@ createApp({
                 this.errorMessage = '';
                 this.successMessage = '';
             }, 5000);
+        },
+        
+        darkenColor(color, factor) {
+            // Функция для затемнения цвета
+            if (color.startsWith('#')) {
+                const num = parseInt(color.replace('#', ''), 16);
+                const r = Math.floor((num >> 16) * factor);
+                const g = Math.floor(((num >> 8) & 0x00FF) * factor);
+                const b = Math.floor((num & 0x0000FF) * factor);
+                return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+            }
+            return color;
         }
     },
     
