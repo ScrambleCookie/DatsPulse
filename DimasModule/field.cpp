@@ -1,6 +1,6 @@
 #include "field.h"
 
-Field::Field(std::string fileName)//Убрать из конструктора максимальные размеры
+Field::Field(std::string fileName)
 {
     std::fstream inputStr(fileName);
     data = json::parse(inputStr);
@@ -65,6 +65,43 @@ Field::Field(std::string fileName)//Убрать из конструктора �
             };
         }
     }
+}
+
+std::vector<std::pair<long int, long int>> Field::getNearHexes(long int x, long int y)
+{
+    std::pair<long int, long int> buff;
+    std::vector<std::pair<long int, long int>> ans;
+    buff.first = x + 1;
+    buff.second = y;
+    ans.push_back(buff);
+    buff.first = x - 1;
+    buff.second = y;
+    ans.push_back(buff);
+    buff.first = x;
+    buff.second = y + 1;
+    ans.push_back(buff);
+    buff.first = x;
+    buff.second = y - 1;
+    ans.push_back(buff);
+    if(y % 2 == 0)
+    {
+        buff.first = x - 1;
+        buff.second = y - 1;
+        ans.push_back(buff);
+        buff.first = x - 1;
+        buff.second = y + 1;
+        ans.push_back(buff);
+    }
+    else
+    {
+        buff.first = x + 1;
+        buff.second = y - 1;
+        ans.push_back(buff);
+        buff.first = x + 1;
+        buff.second = y + 1;
+        ans.push_back(buff);
+    }
+    return ans;
 }
 std::pair<long int, long int> Field::getAnthillPosition() const {
     return anthillPosition;
