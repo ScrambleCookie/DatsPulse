@@ -56,4 +56,16 @@ Field::Field(std::string fileName)//Убрать из конструктора �
         //enemyAnts.push_back(Unit(0, (long int)(data["ants"][i]["q"])-xOffset, (long int)(data["ants"][i]["r"])-yOffset, data["ants"][i]["type"],
         //                      data["ants"][i]["health"], data["ants"][i]["food"]["amount"], (static_cast<FOOD_TYPE> data["ants"][i]["food"]["type"])));
     }
+    for (long int i = 0; i < data["map"].size(); i++) {
+        // Типа сохранение позиции муравейника
+        if (static_cast<HEX_TYPE>(data["map"][i]["type"]) == HIVE) {
+            anthillPosition = {
+                (long int)(data["map"][i]["q"]),
+                (long int)(data["map"][i]["r"])
+            };
+        }
+    }
+}
+std::pair<long int, long int> Field::getAnthillPosition() const {
+    return anthillPosition;
 }

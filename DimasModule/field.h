@@ -60,6 +60,25 @@ public:
         }
         return ans;
     }
+    bool isPointValid(long int x, long int y) const {
+        return x >= 0 && y >= 0 && x < width && y < height;
+    }
+
+    HEX_TYPE getHexType(long int x, long int y) const {
+        return field[x][y].type;
+    }
+
+    std::pair<long int, long int> getAnthillPosition() const {
+        // Реализация поиска муравейника
+        for (long int x = 0; x < width; x++) {
+            for (long int y = 0; y < height; y++) {
+                if (field[x][y].type == HIVE) {
+                    return { x + xOffset, y + yOffset };
+                }
+            }
+        }
+        return { -1, -1 }; // Если не найден
+    }
 
 private:
     long int height, width, yOffset, xOffset;//Вычесть отступ  файл->мы, прибавить отступ мы->файл
