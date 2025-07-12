@@ -22,8 +22,8 @@ Field::Field(std::string fileName)//Убрать из конструктора �
 
     width = maxWidth - minWidth + 1;
     height = maxHeight - minHeight + 1;
-    xOffset = minWidth;
-    yOffset = minHeight;
+    xOffset = minWidth % 2 == 0 ? minWidth : minWidth+1;
+    yOffset = minHeight % 2 == 0 ? minHeight : minHeight+1;
 
     std::vector<Hex> buff1;
     Hex buff = {HEX_TYPE::UNKNOWN, FOOD_TYPE::APPLE, 0, 0};

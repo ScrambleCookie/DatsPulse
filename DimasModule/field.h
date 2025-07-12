@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <utility>
-#include "json-3.12.0/single_include/nlohmann/json.hpp"
+#include "json.hpp"
 enum HEX_TYPE {ROCK, ACID, HIVE, MUD, EMPTY, UNKNOWN, MAP_EDGE};
 enum FOOD_TYPE {BREAD, APPLE, NECTAR};
 using json = nlohmann::json;

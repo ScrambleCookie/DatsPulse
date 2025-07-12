@@ -157,7 +157,7 @@ CMakeFiles/DimasModule.dir/main.cpp.obj: \
  C:/MyData/Tools/mingw64/include/c++/13.2.0/bits/sstream.tcc \
  C:/MyData/Tools/mingw64/include/c++/13.2.0/utility \
  C:/MyData/Tools/mingw64/include/c++/13.2.0/bits/stl_relops.h \
- C:\TEMPORARYDATA\datsPulse\DatsPulse\DimasModule\json-3.12.0/single_include/nlohmann/json.hpp \
+ C:\TEMPORARYDATA\datsPulse\DatsPulse\DimasModule\json.hpp \
  C:/MyData/Tools/mingw64/include/c++/13.2.0/algorithm \
  C:/MyData/Tools/mingw64/include/c++/13.2.0/bits/stl_algo.h \
  C:/MyData/Tools/mingw64/include/c++/13.2.0/bits/algorithmfwd.h \

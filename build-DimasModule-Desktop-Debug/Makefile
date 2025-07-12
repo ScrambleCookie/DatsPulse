@@ -173,6 +173,30 @@ DimasModule/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\DimasModule.dir\build.make CMakeFiles/DimasModule.dir/build
 .PHONY : DimasModule/fast
 
+Unit.obj: Unit.cpp.obj
+.PHONY : Unit.obj
+
+# target to build an object file
+Unit.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\DimasModule.dir\build.make CMakeFiles/DimasModule.dir/Unit.cpp.obj
+.PHONY : Unit.cpp.obj
+
+Unit.i: Unit.cpp.i
+.PHONY : Unit.i
+
+# target to preprocess a source file
+Unit.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\DimasModule.dir\build.make CMakeFiles/DimasModule.dir/Unit.cpp.i
+.PHONY : Unit.cpp.i
+
+Unit.s: Unit.cpp.s
+.PHONY : Unit.s
+
+# target to generate assembly for a file
+Unit.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\DimasModule.dir\build.make CMakeFiles/DimasModule.dir/Unit.cpp.s
+.PHONY : Unit.cpp.s
+
 field.obj: field.cpp.obj
 .PHONY : field.obj
 
@@ -234,6 +258,9 @@ help:
 	@echo ... list_install_components
 	@echo ... rebuild_cache
 	@echo ... DimasModule
+	@echo ... Unit.obj
+	@echo ... Unit.i
+	@echo ... Unit.s
 	@echo ... field.obj
 	@echo ... field.i
 	@echo ... field.s
